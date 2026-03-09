@@ -59,10 +59,12 @@ Dans WinDBG, nous pouvons afficher la chaine ASCII à ces adresses avec : `da <a
 </table>
 
 `strings_not_equal` compare donc notre input à “I am just a renegade hocky mom.” Comme notre entrée n'est pas égale, voyons ce qui se passe si explode_bomb s'appelle:
+
 ![echec - bombe explose](images/boom1.png)
 
 Nous pouvons donc écrire `I am just a renegade hocky mom.` dans la première ligne de notre fichier `solutions.txt` et relancer le programme avec ce dernier en argument. 
-Nous définissons directement notre breakpoint à `phase_2`, et confirmons la réussite de cette première phase: 
+Nous définissons directement notre breakpoint à `phase_2`, et confirmons la réussite de cette première phase:
+
 ![succès - bombe diffusé](images/phase1done.png)
 
 
