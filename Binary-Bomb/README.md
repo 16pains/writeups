@@ -92,6 +92,8 @@ Ensuite, le programme initialise un compteur à 1 (`mov dword ptr [rbp+4], 1`) e
 
 L'inscription de la suite `1 2 4 8 16 32` dans le fichier `solutions.txt` permet de franchir cette étape. En relançant le binaire avec ce fichier en argument et en configurant le breakpoint à `phase_3`, le programme valide automatiquement les deux premières phases et s'immobilise au point d'arrêt de la phase 3, confirmant l'exactitude de l'analyse.
 
+![phase_2 done](images/phase2done.png)
+
 # Phase 3
 
 # Phase 4
