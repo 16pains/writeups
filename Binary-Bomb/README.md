@@ -38,6 +38,13 @@ call    bomb!ILT+810(strings_not_equal) (00007ff7`c897132f)
 call    bomb!ILT+945(explode_bomb) (00007ff7`c89713b6)
 ```
 
+Les noms des fonctions étant assez explicite, mais après une rapide vérification, la première compare notre entrée à une autre chaîne. Si les chaînes ne sont pas égales, le saut ammenant à `phase_defused` et `phase_2` est coutourné, et un appel à `explode_bomb` est effecuté. Nous devons donc découvrir le contenu à l’adresse où la chaîne est comparée.
+
+Si nous rentrons dans l’appel `strings_not_equal`, nous pouvons vérifier les arguments fournis à la fonction. Dans la convention d'appel de Microsoft x64, l'argument 1 est conservé dans le registre RCX, et l'argument 2 dans le registre RDX. 
+Dans WinDBG, nous pouvons afficher le ASCII chaîne à ces adresses avec : `da <address>. Par exemple:
+
+
+
 
 # Phase 2
 
