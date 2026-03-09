@@ -23,6 +23,12 @@ Le laboratoire Binary Bomb constitue une immersion dans l'analyse de fichiers bi
 
 # Phase 1
 
+Après avoir ouvert `bomb.exe` dans WinDbg et chargé les symboles (`.reload /f`), je défini un breakpoint sur la fonction `main`, puis je parcours les instructions pas à pas jusqu'à ce que le programme me demande de rentrer un input. Je rentre `test` pour observer le comportement, et nous pouvons voir que la suite est un appel à une fonction `phase_1`. 
+
+\> `uf phase_1`pour désassembler la fonction : 
+![Fonction phase_1()](images/ufphase1.png)
+
+
 # Phase 2
 
 # Phase 3
