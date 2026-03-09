@@ -38,10 +38,10 @@ call    bomb!ILT+810(strings_not_equal) (00007ff7`c897132f)
 call    bomb!ILT+945(explode_bomb) (00007ff7`c89713b6)
 ```
 
-Les noms des fonctions étant assez explicite, mais après une rapide vérification, la première compare notre entrée à une autre chaîne de caractère. Si les chaînes ne sont pas égales, le saut amenant à `phase_defused` et `phase_2` est coutourné, et un appel à `explode_bomb` est effecuté. Nous devons donc découvrir le contenu à l’adresse où la chaîne est comparée.
+Les noms des fonctions étant assez explicite, mais après une rapide vérification, la première compare notre entrée à une autre chaîne de caractère. Si les chaînes ne sont pas égales, le saut amenant à `phase_defused` et `phase_2` est coutourné, et un appel à `explode_bomb` est effecuté. Il faut donc découvrir le contenu à l’adresse où la chaîne est comparée.
 
-Si nous rentrons dans l’appel `strings_not_equal`, nous pouvons vérifier les arguments fournis à la fonction. Dans la convention d'appel de Microsoft x64, l'argument 1 est conservé dans le registre RCX, et l'argument 2 dans le registre RDX. 
-Dans WinDBG, nous pouvons afficher la chaine ASCII à ces adresses avec : `da <address>`.
+En rentrant dans l’appel `strings_not_equal`, je peux vérifier les arguments fournis à la fonction. Dans la convention d'appel de Microsoft x64, l'argument 1 est conservé dans le registre RCX, et l'argument 2 dans le registre RDX. 
+Dans WinDBG, on peut afficher la chaine ASCII à ces adresses avec : `da <address>`.
 
 <table style="width: 100%;">
   <tr>
@@ -58,17 +58,39 @@ Dans WinDBG, nous pouvons afficher la chaine ASCII à ces adresses avec : `da <a
   </tr>
 </table>
 
-`strings_not_equal` compare donc notre input à “I am just a renegade hocky mom.” Comme notre entrée n'est pas égale, voyons ce qui se passe si `explode_bomb` est appelée :
+`strings_not_equal` compare donc mon input à “I am just a renegade hocky mom.” Comme l'entrée n'est pas égale, voyons ce qui se passe si `explode_bomb` est appelée :
 
 ![echec - bombe explose](images/boom1.png)
 
-Nous pouvons donc écrire `I am just a renegade hocky mom.` dans la première ligne de notre fichier `solutions.txt` et relancer le programme avec ce dernier en argument. 
-Nous définissons directement notre breakpoint à `phase_2`, et confirmons la réussite de cette première phase:
+Je peux donc écrire `I am just a renegade hocky mom.` dans la première ligne de mon fichier `solutions.txt` et relancer le programme avec ce dernier en argument. 
+Je définis directement notre breakpoint à `phase_2`, et confirme la réussite de cette première phase:
 
 ![succès - bombe diffusé](images/phase1done.png)
 
-
 # Phase 2
+Comme précédement, je parcours la fonction `phase_2` jusqu'à trouvé un appel intéressant. 
+```asm
+call    bomb!ILT+205(read_six_numbers) (00007ff7`c89710d2)
+```
+L'appel à la fonction `read_six_numbers` confirme que le programme attend exactement six arguments entiers. Après avoir désassemblé cette fonction (`uf read_six_numbers`), on remarque l'utilisation de `sscanf` avec un format de chaîne spécifique. 
+En utilisant la commande `da 00007ff7c897c460` sur l'adresse chargée dans le registre rdx, on peut confirmer le format "%d %d %d %d %d %d".
+```
+0:000> da 7ff7c897c460
+00007ff7`c897c460  "%d %d %d %d %d %d"
+```
+La fonction vérifie ensuite que la valeur de retour de sscanf (stockée dans eax) est supérieure ou égale à 6 ; dans le cas contraire, la bombe explose immédiatement.
+
+Une fois la lecture validée, le flux d'exécution retourne dans `phase_2` pour la vérification des valeurs. L'analyse pas à pas du désassemblage de `phase_2` (via `uf phase_2`) révèle une structure de contrôle itérative.
+
+Le désassemblage révèle que la validation commence par l'examen du premier élément de la séquence. À l'adresse `00007ff7c89720f0`, l'instruction `cmp dword ptr [rbp+rax+28h], 1` compare la première valeur saisie avec la constante 1. Le registre rax ayant été multiplié par zéro juste avant (`imul rax, rax, 0`), il sert d'index initial pour pointer sur le début de notre tableau de nombres en mémoire. Si ce premier nombre diffère de 1, le programme bifurque vers `explode_bomb`.
+
+![phase_2](images/phase2-1.png)
+
+Ensuite, le programme initialise un compteur à 1 (`mov dword ptr [rbp+4], 1`) et entre dans une boucle de vérification. Pour chaque itération, le code compare l'élément actuel avec l'élément précédent transformé. Le mécanisme de calcul se situe entre les adresses `00007ff7c8972113` et `00007ff7c8972129` : Le programme récupère l'index de l'élément précédent (`dec ecx`).La valeur correspondante est chargée dans le registre `ecx`.L'instruction `shl ecx, 1` est appliquée. En architecture x86-64, décaler les bits vers la gauche d'une position revient mathématiquement à multiplier la valeur par deux. Enfin, le programme compare l'élément actuel (`[rbp+rax*4+28h]`) avec ce résultat. Cette structure implique que chaque nombre de la suite doit être le double exact de son prédécesseur. En débutant la séquence par 1, nous obtenons : `1, 2, 4, 8, 16, 32`
+
+![phase_2-2](images/phase2-2.png)
+
+L'inscription de la suite `1 2 4 8 16 32` dans le fichier `solutions.txt` permet de franchir cette étape. En relançant le binaire avec ce fichier en argument et en configurant le breakpoint à `phase_3`, le programme valide automatiquement les deux premières phases et s'immobilise au point d'arrêt de la phase 3, confirmant l'exactitude de l'analyse.
 
 # Phase 3
 
