@@ -96,7 +96,7 @@ L'inscription de la suite `1 2 4 8 16 32` dans le fichier `solutions.txt` permet
 
 # Phase 3
 
-L'analyse commence par l'identification des entrées attendues. En examinant l'appel à `sscanf` à l'adresse `00007ff7c89721fb`, on remarque que deux arguments sont passés via les registres r8 et r9. L'inspection de la chaîne de format à l'adresse chargée dans rdx (`da 00007ff7c897c220`) révèle le masque `%d %d`. Le programme attend donc deux entiers, et vérifie immédiatement que l'utilisateur a bien fourni ces deux valeurs en comparant le résultat de `sscanf` à 2.
+L'analyse commence par l'identification des entrées attendues. En examinant l'appel à `sscanf` à l'adresse `00007ff7c89721fb`, on remarque que deux arguments sont passés via les registres `r8` et `r9`. L'inspection de la chaîne de format à l'adresse chargée dans `rdx` (`da 00007ff7c897c220`) révèle le masque `%d %d`. Le programme attend donc deux entiers, et vérifie immédiatement que l'utilisateur a bien fourni ces deux valeurs en comparant le résultat de `sscanf` à 2.
 
 ![phase_3-1](images/phase3-1.png)
 
@@ -107,24 +107,22 @@ La logique de la phase suivante repose sur le premier nombre saisi, qui sert d'i
 Le calcul de l'adresse de destination est particulièrement intéressant à observer dans WinDbg. Les instructions suivantes :
 
 `movsxd rax, dword ptr [rbp+134h]` : Charge l'index choisi.
-
 `mov eax, dword ptr [rcx+rax*4+122CCh]` : Récupère l'offset correspondant dans la table de saut.
-
 `add rax, rcx` : Calcule l'adresse finale.
-
 `jmp rax` : Effectue le saut vers le "case" correspondant.
 
 ![phase_3-3](images/phase3-3.png)
 
 Chaque destination de saut assigne une valeur spécifique à une variable locale (située à `rbp+44h`). Une fois le saut effectué, le flux d'exécution se rejoint à l'adresse `00007ff7c897228f`. À cet endroit, le programme compare le second nombre que nous avons saisi avec la valeur de référence associée à l'index choisi : `cmp dword ptr [rbp+44h], eax`
 
-Pour résoudre cette phase, il suffit d'intercepter l'exécution après le saut ou d'analyser.
+Pour résoudre cette phase, il suffit d'intercepter l'exécution après le saut :
 ```
 0:000> dd rbp+44h L1
 00000037`774ff944  0000025a
 ```
 
 En choisissant un index valide (par exemple : `0`) et en identifiant la valeur attendue associée (`602` en décimal), on obtient la paire de solutions. J'ajoute donc `0 602` à la troisième ligne du fichier `solutions.txt`. Le programme valide la phase 3 et nous dirige vers la phase 4.
+
 ![phase_3-done](images/phase3-done.png)
 
 # Phase 4
