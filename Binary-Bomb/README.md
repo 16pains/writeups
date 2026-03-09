@@ -15,7 +15,9 @@ Le laboratoire Binary Bomb constitue une immersion dans l'analyse de fichiers bi
 
 # Configuration
 \> Cette analyse est réalisée sous Windows (WinDbg & Visual Studio).
+
 \> `bomb.pdb` permet de charger les symboles, transformant les adresses mémoires brutes en noms de fonctions et de variables explicites.
+
 \> Pour fluidifier le désamorçage, les réponses de chaque phase sont enregistrées dans un fichier texte à raison d'une solution par ligne. En passant ce fichier en argument au binaire (bomb.exe solutions.txt), le programme valide automatiquement les phases déjà résolues.
 
 
