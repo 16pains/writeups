@@ -47,12 +47,12 @@ Dans WinDBG, nous pouvons afficher la chaine ASCII à ces adresses avec : `da <a
   <tr>
     <td style="width: 50%;">
       <p align="center">
-        <img src="Binary-Bomb/images/registre1.png" width="100%" alt="Début GDB">
+        <img src="images/registre1.png" width="100%" alt="registres">
       </p>
     </td>
     <td style="width: 50%;">
       <p align="center">
-        <img src="Binary-Bomb/images/dardxrcx.png" width="100%" alt="Phase 1">
+        <img src="images/dardxrcx.png" width="100%" alt="da_rcx_rdx">
       </p>
     </td>
   </tr>
