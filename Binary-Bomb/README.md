@@ -28,6 +28,16 @@ Après avoir ouvert `bomb.exe` dans WinDbg et chargé les symboles (`.reload /f`
 \> `uf phase_1`pour désassembler la fonction : 
 ![Fonction phase_1()](images/ufphase1.png)
 
+Deux appels de fonction nous intéressent : 
+
+```asm
+call    bomb!ILT+810(strings_not_equal) (00007ff7`c897132f)
+```
+&
+```asm
+call    bomb!ILT+945(explode_bomb) (00007ff7`c89713b6)
+```
+
 
 # Phase 2
 
