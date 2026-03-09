@@ -73,16 +73,16 @@ Comme précédement, je parcours la fonction `phase_2` jusqu'à trouvé un appel
 call    bomb!ILT+205(read_six_numbers) (00007ff7`c89710d2)
 ```
 L'appel à la fonction `read_six_numbers` confirme que le programme attend exactement six arguments entiers. Après avoir désassemblé cette fonction (`uf read_six_numbers`), on remarque l'utilisation de `sscanf` avec un format de chaîne spécifique. 
-En utilisant la commande `da 00007ff7c897c460` sur l'adresse chargée dans le registre rdx, on peut confirmer le format "%d %d %d %d %d %d".
+En utilisant la commande `da 00007ff7c897c460` sur l'adresse chargée dans le registre `rdx`, on peut confirmer le format `%d %d %d %d %d %d`.
 ```
 0:000> da 7ff7c897c460
 00007ff7`c897c460  "%d %d %d %d %d %d"
 ```
-La fonction vérifie ensuite que la valeur de retour de sscanf (stockée dans eax) est supérieure ou égale à 6 ; dans le cas contraire, la bombe explose immédiatement.
+La fonction vérifie ensuite que la valeur de retour de sscanf (stockée dans `eax`) est supérieure ou égale à 6 ; dans le cas contraire, la bombe explose immédiatement.
 
 Une fois la lecture validée, le flux d'exécution retourne dans `phase_2` pour la vérification des valeurs. L'analyse pas à pas du désassemblage de `phase_2` (via `uf phase_2`) révèle une structure de contrôle itérative.
 
-Le désassemblage révèle que la validation commence par l'examen du premier élément de la séquence. À l'adresse `00007ff7c89720f0`, l'instruction `cmp dword ptr [rbp+rax+28h], 1` compare la première valeur saisie avec la constante 1. Le registre rax ayant été multiplié par zéro juste avant (`imul rax, rax, 0`), il sert d'index initial pour pointer sur le début de notre tableau de nombres en mémoire. Si ce premier nombre diffère de 1, le programme bifurque vers `explode_bomb`.
+Le désassemblage révèle que la validation commence par l'examen du premier élément de la séquence. À l'adresse `00007ff7c89720f0`, l'instruction `cmp dword ptr [rbp+rax+28h], 1` compare la première valeur saisie avec la constante 1. Le registre `rax` ayant été multiplié par zéro juste avant (`imul rax, rax, 0`), il sert d'index initial pour pointer sur le début de notre tableau de nombres en mémoire. Si ce premier nombre diffère de 1, le programme bifurque vers `explode_bomb`.
 
 ![phase_2](images/phase2-1.png)
 
