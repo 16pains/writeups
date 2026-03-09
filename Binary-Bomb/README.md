@@ -58,7 +58,7 @@ Dans WinDBG, nous pouvons afficher la chaine ASCII à ces adresses avec : `da <a
   </tr>
 </table>
 
-`strings_not_equal` compare donc notre input à “I am just a renegade hocky mom.” Comme notre entrée n'est pas égale, voyons ce qui se passe si explode_bomb s'appelle:
+`strings_not_equal` compare donc notre input à “I am just a renegade hocky mom.” Comme notre entrée n'est pas égale, voyons ce qui se passe si `explode_bomb` est appelée :
 
 ![echec - bombe explose](images/boom1.png)
 
