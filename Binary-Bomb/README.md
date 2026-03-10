@@ -174,7 +174,28 @@ La solution pour cette phase est le couple d'entiers 5 115. En les ajoutant à l
 
 # Phase 6
 
-L'analyse de cette dernière phase commence par l'appel à `read_six_numbers` à l'adresse `00007ff6dcf8260d`. Le programme attend six entiers qui subissent immédiatement deux tests de validité. Le binaire vérifie d'abord que chaque nombre est compris entre 1 et 6, puis s'assure de l'absence de doublons via une double boucle de comparaison située entre les adresses `00007ff6dcf8262c` et `00007ff6dcf8269c`. Si l'une de ces conditions n'est pas remplie, la fonction explode_bomb est déclenchée.
+Cette phase finale débute par une procédure de validation rigoureuse des six entiers fournis par l'utilisateur. L'appel à la fonction `read_six_numbers` à l'adresse `00007ff6dcf8260d` prépare le terrain en stockant les entrées sur la pile, à partir de l'adresse `rbp+48h`. Une fois ces valeurs chargées, le programme engage une série de tests de conformité avant même d'entamer la manipulation de la liste chaînée.
+
+Le premier bloc logique, situé entre les adresses `00007ff6dcf8262c` et `00007ff6dcf82656`, implémente une boucle de contrôle qui itère six fois. À chaque itération, l'index de la boucle (stocké à l'adresse `rbp+0C4h`) est chargé dans le registre `rax` via l'instruction `movsxd`. Le programme accède alors à l'entier correspondant dans notre tableau d'entrée via l'adressage `[rbp+rax*4+48h]`
+Deux comparaisons critiques sont alors effectuées :
+
+```asm
+bomb!phase_6+0x85 [C:\Users\user\Desktop\bomb-source-with-selected-phases-used-in-arch1001\src\phases.c @ 296]:
+  296 00007ff6`dcf82635 486385c4000000  movsxd  rax,dword ptr [rbp+0C4h]
+  296 00007ff6`dcf8263c 837c854801      cmp     dword ptr [rbp+rax*4+48h],1
+  296 00007ff6`dcf82641 7c0e            jl      bomb!phase_6+0xa1 (00007ff6`dcf82651)  Branch
+```
+
+\> L'instruction cmp ..., 1 suivie d'un saut conditionnel jl vérifie que la valeur n'est pas inférieure à 1.
+
+
+```asm
+bomb!phase_6+0x93 [C:\Users\user\Desktop\bomb-source-with-selected-phases-used-in-arch1001\src\phases.c @ 296]:
+  296 00007ff6`dcf82643 486385c4000000  movsxd  rax,dword ptr [rbp+0C4h]
+  296 00007ff6`dcf8264a 837c854806      cmp     dword ptr [rbp+rax*4+48h],6
+  296 00007ff6`dcf8264f 7e05            jle     bomb!phase_6+0xa6 (00007ff6`dcf82656)  Branch
+```
+\> L'instruction cmp ..., 6 suivie d'un saut jle confirme que la valeur n'excède pas 6
 
 La particularité de la phase suivante réside dans l'utilisation d'une liste chaînée statique débutant à l'adresse `bomb!node1`. L'exploration de la mémoire avec la commande `dq` (Display Quad-word) dans WinDbg permet de déconstruire la structure interne de chaque nœud. Chaque élément occupe 16 octets : 
 - les 4 premiers octets contiennent la valeur numérique (le score),
