@@ -173,3 +173,33 @@ La solution pour cette phase est le couple d'entiers 5 115. En les ajoutant à l
 ![phase5-done](images/phase5-done.png)
 
 # Phase 6
+
+L'analyse de cette dernière phase commence par l'appel à `read_six_numbers` à l'adresse `00007ff6dcf8260d`. Le programme attend six entiers qui subissent immédiatement deux tests de validité. Le binaire vérifie d'abord que chaque nombre est compris entre 1 et 6, puis s'assure de l'absence de doublons via une double boucle de comparaison située entre les adresses `00007ff6dcf8262c` et `00007ff6dcf8269c`. Si l'une de ces conditions n'est pas remplie, la fonction explode_bomb est déclenchée.
+
+La particularité de la phase suivante réside dans l'utilisation d'une liste chaînée statique débutant à l'adresse `bomb!node1`. L'exploration de la mémoire avec la commande `dq` (Display Quad-word) dans WinDbg permet de déconstruire la structure interne de chaque nœud. Chaque élément occupe 16 octets : 
+- les 4 premiers octets contiennent la valeur numérique (le score),
+- les 4 suivants représentent l'ID du nœud (de 1 à 6),
+- les 8 octets restants constituent le pointeur vers le nœud suivant.
+
+Comme le montre la capture ci-dessus, j'ai parcouru manuellement la liste en suivant les pointeurs successifs. Le nœud n°1 (0x212) pointe vers l'adresse ...f040, qui contient le nœud n°2, et ainsi de suite jusqu'au nœud n°6 qui pointe vers NULL.
+
+![phase6-2](images/phase6-2.png)
+
+
+| **Nœud (ID)** | **Valeur (Hex)** | **Valeur (Décimal)** | **Adresse du suivant** |
+| ------------- | ---------------- | -------------------- | ---------------------- |
+| **1**         | `0x212`          | **530**              | `...f040`              |
+| **2**         | `0x1c2`          | **450**              | `...f030`              |
+| **3**         | `0x215`          | **533**              | `...f020`              |
+| **4**         | `0x393`          | **915**              | `...f010`              |
+| **5**         | `0x3a7`          | **935**              | `...f000`              |
+| **6**         | `0x200`          | **512**              | `0x000` (Fin)          |
+
+
+Le programme utilise les six nombres saisis comme un nouvel ordre pour réorganiser les pointeurs de la liste. Après cette restructuration, une boucle finale (située à l'adresse `00007ff6dcf827a3`) parcourt la nouvelle liste pour vérifier une condition critique : chaque nœud doit posséder une valeur supérieure ou égale à celle du nœud suivant.
+
+Le binaire exige donc que nous réordonnions les nœuds par ordre décroissant de leurs valeurs numériques.
+
+En classant les valeurs identifiées précédemment du plus grand au plus petit (935 > 915 > 533 > 530 > 512 > 450), nous obtenons la séquence d'ID suivante : 5 4 3 1 6 2.
+
+L'ajout de cette suite dans le fichier solutions.txt désamorce la sixième phase. Le programme affiche alors le message de félicitations, confirmant que la "bombe" a été intégralement neutralisée.
