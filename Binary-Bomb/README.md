@@ -107,8 +107,11 @@ La logique de la phase suivante repose sur le premier nombre saisi, qui sert d'i
 Le calcul de l'adresse de destination est particulièrement intéressant à observer dans WinDbg. Les instructions suivantes :
 
 `movsxd rax, dword ptr [rbp+134h]` : Charge l'index choisi.
+
 `mov eax, dword ptr [rcx+rax*4+122CCh]` : Récupère l'offset correspondant dans la table de saut.
+
 `add rax, rcx` : Calcule l'adresse finale.
+
 `jmp rax` : Effectue le saut vers le "case" correspondant.
 
 ![phase_3-3](images/phase3-3.png)
@@ -126,6 +129,20 @@ En choisissant un index valide (par exemple : `0`) et en identifiant la valeur a
 ![phase_3-done](images/phase3-done.png)
 
 # Phase 4
+
+L'étude débute par l'identification des entrées via l'appel à sscanf à l'adresse `00007ff6dcf823ad`. Le programme attend une paire d'entiers (`%d %d`), le premier étant stocké à l'adresse `rbp+4` et le second à `rbp+24h`. Immédiatement après la lecture, le binaire impose une contrainte de domaine stricte : le premier entier doit être compris entre 0 et 14 (`0xE`). Cette vérification est effectuée par deux instructions `cmp` successives aux adresses `00007ff6dcf823c1` et `00007ff6dcf823c7`. Tout dépassement de cette plage entraîne l'explosion de la bombe.
+
+![phase4-1](images/phase4-1.png)
+
+
+Une fois la validité du domaine confirmée, le programme prépare les arguments pour la fonction `func4` . En respectant la convention d'appel Microsoft x64, les registres sont chargés comme suit : `ecx` reçoit notre premier entier, `edx` est initialisé à 0 (borne inférieure) et `r8d` est fixé à 14 (borne supérieure). 
+La première section critique de la fonction calcule le point médian de l'intervalle actuel. Le binaire utilise une séquence d'instructions `sub`, `sar` et `add` pour obtenir le pivot : *mid = low + (high - low) / 2*. Ce pivot, stocké temporairement à l'adresse `rbp+4`, sert de base à la décision récursive et à la valeur de retour.La particularité de cette fonction réside dans son caractère accumulatif. Si l'entrée utilisateur est inférieure au pivot, `func4` s'appelle récursivement sur la moitié inférieure de l'intervalle et ajoute la valeur du pivot actuel au résultat renvoyé par l'appel suivant (`add eax, dword ptr [rbp+4]`). Si l'entrée est supérieure, elle procède de la même manière sur la moitié supérieure. La récursion ne s'arrête et ne renvoie que le pivot seul que lorsque l'entrée est strictement égale à ce dernier.
+
+![phase4-2](images/phase4-2.png)
+
+Dans `phase_4`, le succès dépend d'une double condition : le résultat final de `func4` doit être égal à 10 (`0xA`), et notre second entier saisi doit également correspondre à cette valeur. Pour déterminer le premier entier, il est nécessaire de tracer le chemin de l'accumulation. En partant de l'intervalle [0, 14], le premier pivot calculé est $7$. Pour obtenir un total de $10$, nous devons entrer dans une branche récursive qui retournera $3$ ($3 + 7 = 10$). En analysant la branche inférieure $[0, 6]$, le pivot calculé est $3$. Si notre entrée est précisément $3$, la fonction s'arrêtera à ce niveau et renverra $3$ au premier appel, validant ainsi l'équation $3 + 7 = 10$.Capture d'écran conseillée : Une vue de la pile d'appels (k) dans WinDbg lors de la récursion, ou une capture du registre eax juste après le retour de func4 montrant la valeur 0xa.En inscrivant la paire 3 10 à la quatrième ligne du fichier solutions.txt, le programme valide la phase. L'exécution automatique confirme que les conditions logiques sont remplies, permettant ainsi d'accéder à la phase suivante.
+
+
 
 # Phase 5
 
