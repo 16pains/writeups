@@ -132,7 +132,7 @@ En choisissant un index valide (par exemple : `0`) et en identifiant la valeur a
 
 L'étude débute par l'identification des entrées via l'appel à sscanf à l'adresse `00007ff6dcf823ad`. Le programme attend une paire d'entiers (`%d %d`), le premier étant stocké à l'adresse `rbp+4` et le second à `rbp+24h`. Immédiatement après la lecture, le binaire impose une contrainte de domaine stricte : le premier entier doit être compris entre 0 et 14 (`0xE`). Cette vérification est effectuée par deux instructions `cmp` successives aux adresses `00007ff6dcf823c1` et `00007ff6dcf823c7`. Tout dépassement de cette plage entraîne l'explosion de la bombe.
 
-![phase4-1](images/phase4-1.png)
+![phase4-1](images/pahse4-1.png)
 
 
 Une fois la validité du domaine confirmée, le programme prépare les arguments pour la fonction `func4` . En respectant la convention d'appel Microsoft x64, les registres sont chargés comme suit : `ecx` reçoit notre premier entier, `edx` est initialisé à 0 (borne inférieure) et `r8d` est fixé à 14 (borne supérieure). 
