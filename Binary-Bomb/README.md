@@ -140,8 +140,16 @@ La première section critique de la fonction calcule le point médian de l'inter
 
 ![phase4-2](images/phase4-2.png)
 
-Dans `phase_4`, le succès dépend d'une double condition : le résultat final de `func4` doit être égal à 10 (`0xA`), et notre second entier saisi doit également correspondre à cette valeur. Pour déterminer le premier entier, il est nécessaire de tracer le chemin de l'accumulation. En partant de l'intervalle [0, 14], le premier pivot calculé est $7$. Pour obtenir un total de $10$, nous devons entrer dans une branche récursive qui retournera $3$ ($3 + 7 = 10$). En analysant la branche inférieure $[0, 6]$, le pivot calculé est $3$. Si notre entrée est précisément $3$, la fonction s'arrêtera à ce niveau et renverra $3$ au premier appel, validant ainsi l'équation $3 + 7 = 10$.Capture d'écran conseillée : Une vue de la pile d'appels (k) dans WinDbg lors de la récursion, ou une capture du registre eax juste après le retour de func4 montrant la valeur 0xa.En inscrivant la paire 3 10 à la quatrième ligne du fichier solutions.txt, le programme valide la phase. L'exécution automatique confirme que les conditions logiques sont remplies, permettant ainsi d'accéder à la phase suivante.
+Dans `phase_4`, le succès dépend d'une double condition : le résultat final de `func4` doit être égal à 10 (`0xA`), et notre second entier saisi doit également correspondre à cette valeur. Pour déterminer le premier entier, il est nécessaire de tracer le chemin de l'accumulation. En partant de l'intervalle [0, 14], le premier pivot calculé est 7. Pour obtenir un total de 10, nous devons entrer dans une branche récursive qui retournera 3 (3 + 7 = 10). En analysant la branche inférieure [0, 6], le pivot calculé est 3. Si notre entrée est précisément 3, la fonction s'arrêtera à ce niveau et renverra 3 au premier appel, validant ainsi l'équation 3 + 7 = 10.
 
+Comme l'illustre la capture ci-dessus, au moment où le breakpoint est frappé pour la deuxième fois, la pile d'appels affiche `bomb!func4` au niveau 00 appelé par lui-même au niveau 01. Le niveau 02 montre l'appel initial provenant de `phase_4+0x99`.
+
+![phase4-3](images/phase4-3.png)
+
+
+En inscrivant la paire 3 10 à la quatrième ligne du fichier solutions.txt, le programme valide la phase. L'exécution automatique confirme que les conditions logiques sont remplies, permettant ainsi d'accéder à la phase suivante.
+
+![phase4-done](images/phase4-done.png)
 
 
 # Phase 5
