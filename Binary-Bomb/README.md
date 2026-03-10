@@ -165,7 +165,8 @@ En inspectant la mémoire à l'adresse du tableau `n1+0x20` via la commande `dd`
 
 Capture d'écran conseillée : Le dump mémoire du tableau avec dd bomb!n1+0x20 L10 pour montrer les valeurs que tu as utilisées pour ton calcul.
 
-En remontant le tableau à l'envers, la séquence logique de désamorçage est la suivante :$15 (F) \leftarrow 6 \leftarrow 14 (E) \leftarrow 2 \leftarrow 1 \leftarrow 10 (A) \leftarrow 0 \leftarrow 8 \leftarrow 4 \leftarrow 9 \leftarrow 13 (D) \leftarrow 11 (B) \leftarrow 7 \leftarrow 3 \leftarrow 12 (C) \leftarrow 5$Le point de départ nécessaire pour effectuer les 15 itérations est donc l'index 5. En sommant l'intégralité des valeurs de cette chaîne, on obtient un total de 115.
+En remontant le tableau à l'envers, la séquence logique de désamorçage est la suivante :
+$15 (F) \leftarrow 6 \leftarrow 14 (E) \leftarrow 2 \leftarrow 1 \leftarrow 10 (A) \leftarrow 0 \leftarrow 8 \leftarrow 4 \leftarrow 9 \leftarrow 13 (D) \leftarrow 11 (B) \leftarrow 7 \leftarrow 3 \leftarrow 12 (C) \leftarrow 5$
 
 La solution pour cette phase est le couple d'entiers 5 115. En les ajoutant à la cinquième ligne du fichier solutions.txt, le programme valide la boucle de chaînage et confirme que le compteur et la somme correspondent aux attentes du binaire.
 
