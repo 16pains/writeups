@@ -163,11 +163,13 @@ Pour franchir cette phase, deux conditions strictes doivent être remplies à la
 
 En inspectant la mémoire à l'adresse du tableau `n1+0x20` via la commande `dd` dans WinDbg, j'ai pu reconstruire la chaîne de sauts en partant de la fin (la valeur de sortie 15 ou `0xF`).
 
-Capture d'écran conseillée : Le dump mémoire du tableau avec dd bomb!n1+0x20 L10 pour montrer les valeurs que tu as utilisées pour ton calcul.
+![phase5-2](images/phase5-2.png)
 
 En remontant le tableau à l'envers, la séquence logique de désamorçage est la suivante :
 $15 (F) \leftarrow 6 \leftarrow 14 (E) \leftarrow 2 \leftarrow 1 \leftarrow 10 (A) \leftarrow 0 \leftarrow 8 \leftarrow 4 \leftarrow 9 \leftarrow 13 (D) \leftarrow 11 (B) \leftarrow 7 \leftarrow 3 \leftarrow 12 (C) \leftarrow 5$
 
 La solution pour cette phase est le couple d'entiers 5 115. En les ajoutant à la cinquième ligne du fichier solutions.txt, le programme valide la boucle de chaînage et confirme que le compteur et la somme correspondent aux attentes du binaire.
+
+![phase5-done](images/phase5-done.png)
 
 # Phase 6
