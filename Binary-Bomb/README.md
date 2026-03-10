@@ -134,24 +134,39 @@ L'étude débute par l'identification des entrées via l'appel à sscanf à l'ad
 
 ![phase4-1](images/pahse4-1.png)
 
-
 Une fois la validité du domaine confirmée, le programme prépare les arguments pour la fonction `func4` . En respectant la convention d'appel Microsoft x64, les registres sont chargés comme suit : `ecx` reçoit notre premier entier, `edx` est initialisé à 0 (borne inférieure) et `r8d` est fixé à 14 (borne supérieure). 
 La première section critique de la fonction calcule le point médian de l'intervalle actuel. Le binaire utilise une séquence d'instructions `sub`, `sar` et `add` pour obtenir le pivot : *mid = low + (high - low) / 2*. Ce pivot, stocké temporairement à l'adresse `rbp+4`, sert de base à la décision récursive et à la valeur de retour.La particularité de cette fonction réside dans son caractère accumulatif. Si l'entrée utilisateur est inférieure au pivot, `func4` s'appelle récursivement sur la moitié inférieure de l'intervalle et ajoute la valeur du pivot actuel au résultat renvoyé par l'appel suivant (`add eax, dword ptr [rbp+4]`). Si l'entrée est supérieure, elle procède de la même manière sur la moitié supérieure. La récursion ne s'arrête et ne renvoie que le pivot seul que lorsque l'entrée est strictement égale à ce dernier.
 
 ![phase4-2](images/phase4-2.png)
 
-Dans `phase_4`, le succès dépend d'une double condition : le résultat final de `func4` doit être égal à 10 (`0xA`), et notre second entier saisi doit également correspondre à cette valeur. Pour déterminer le premier entier, il est nécessaire de tracer le chemin de l'accumulation. En partant de l'intervalle [0, 14], le premier pivot calculé est 7. Pour obtenir un total de 10, nous devons entrer dans une branche récursive qui retournera 3 (3 + 7 = 10). En analysant la branche inférieure [0, 6], le pivot calculé est 3. Si notre entrée est précisément 3, la fonction s'arrêtera à ce niveau et renverra 3 au premier appel, validant ainsi l'équation 3 + 7 = 10.
-
 Comme l'illustre la capture ci-dessus, au moment où le breakpoint est frappé pour la deuxième fois, la pile d'appels affiche `bomb!func4` au niveau 00 appelé par lui-même au niveau 01. Le niveau 02 montre l'appel initial provenant de `phase_4+0x99`.
 
 ![phase4-3](images/phase4-3.png)
 
+Dans `phase_4`, le succès dépend d'une double condition : le résultat final de `func4` doit être égal à 10 (`0xA`), et notre second entier saisi doit également correspondre à cette valeur. Pour déterminer le premier entier, il est nécessaire de tracer le chemin de l'accumulation. En partant de l'intervalle [0, 14], le premier pivot calculé est 7. Pour obtenir un total de 10, nous devons entrer dans une branche récursive qui retournera 3 (3 + 7 = 10). En analysant la branche inférieure [0, 6], le pivot calculé est 3. Si notre entrée est précisément 3, la fonction s'arrêtera à ce niveau et renverra 3 au premier appel, validant ainsi l'équation 3 + 7 = 10.
 
 En inscrivant la paire 3 10 à la quatrième ligne du fichier solutions.txt, le programme valide la phase. L'exécution automatique confirme que les conditions logiques sont remplies, permettant ainsi d'accéder à la phase suivante.
 
 ![phase4-done](images/phase4-done.png)
 
-
 # Phase 5
+
+L'analyse commence par l'appel à `sscanf` à l'adresse `00007ff6dcf824c0`. Le programme attend deux entiers. Le premier est stocké à l'adresse `rbp+64h` et le second à l'adresse `rbp+84h`. Immédiatement après la lecture, le binaire applique un masque binaire sur le premier entier via l'instruction `and eax, 0Fh` à l'adresse `00007ff6dcf824dc`. Cette opération garantit que seule la valeur des quatre bits de poids faible est conservée, limitant l'entrée effective à une plage comprise entre 0 et 15.
+
+![phase5-1](images/phase5-1.png)
+
+Le binaire entre ensuite dans une boucle itérative dont la structure peut être traduite par l'algorithme suivant :
+À chaque itération, le programme utilise la valeur contenue à l'indice i pour déterminer l'indice j de l'itération suivante. Simultanément, un compteur (`rbp+4`) suit le nombre de sauts et un accumulateur (`rbp+24h`) calcule la somme des valeurs rencontrées.
+Pour franchir cette phase, deux conditions strictes doivent être remplies à la sortie de la boucle : 
+1. Le compteur d'itérations (`rbp+4`) doit être égal à 15. Cela impose de trouver un chemin de saut qui traverse la quasi-totalité du tableau avant d'atteindre la valeur de sortie.
+2. L'accumulateur de somme (`rbp+24h`) doit correspondre exactement au second entier saisi (`rbp+84h`).
+
+En inspectant la mémoire à l'adresse du tableau `n1+0x20` via la commande `dd` dans WinDbg, j'ai pu reconstruire la chaîne de sauts en partant de la fin (la valeur de sortie 15 ou `0xF`).
+
+Capture d'écran conseillée : Le dump mémoire du tableau avec dd bomb!n1+0x20 L10 pour montrer les valeurs que tu as utilisées pour ton calcul.
+
+En remontant le tableau à l'envers, la séquence logique de désamorçage est la suivante :$15 (F) \leftarrow 6 \leftarrow 14 (E) \leftarrow 2 \leftarrow 1 \leftarrow 10 (A) \leftarrow 0 \leftarrow 8 \leftarrow 4 \leftarrow 9 \leftarrow 13 (D) \leftarrow 11 (B) \leftarrow 7 \leftarrow 3 \leftarrow 12 (C) \leftarrow 5$Le point de départ nécessaire pour effectuer les 15 itérations est donc l'index 5. En sommant l'intégralité des valeurs de cette chaîne, on obtient un total de 115.
+
+La solution pour cette phase est le couple d'entiers 5 115. En les ajoutant à la cinquième ligne du fichier solutions.txt, le programme valide la boucle de chaînage et confirme que le compteur et la somme correspondent aux attentes du binaire.
 
 # Phase 6
