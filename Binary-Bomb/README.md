@@ -179,23 +179,14 @@ Cette phase finale débute par une procédure de validation rigoureuse des six e
 Le premier bloc logique, situé entre les adresses `00007ff6dcf8262c` et `00007ff6dcf82656`, implémente une boucle de contrôle qui itère six fois. À chaque itération, l'index de la boucle (stocké à l'adresse `rbp+0C4h`) est chargé dans le registre `rax` via l'instruction `movsxd`. Le programme accède alors à l'entier correspondant dans notre tableau d'entrée via l'adressage `[rbp+rax*4+48h]`
 Deux comparaisons critiques sont alors effectuées :
 
-```asm
-bomb!phase_6+0x85 [C:\Users\user\Desktop\bomb-source-with-selected-phases-used-in-arch1001\src\phases.c @ 296]:
-  296 00007ff6`dcf82635 486385c4000000  movsxd  rax,dword ptr [rbp+0C4h]
-  296 00007ff6`dcf8263c 837c854801      cmp     dword ptr [rbp+rax*4+48h],1
-  296 00007ff6`dcf82641 7c0e            jl      bomb!phase_6+0xa1 (00007ff6`dcf82651)  Branch
-```
-
 \> L'instruction cmp ..., 1 suivie d'un saut conditionnel jl vérifie que la valeur n'est pas inférieure à 1.
-
-
-```asm
-bomb!phase_6+0x93 [C:\Users\user\Desktop\bomb-source-with-selected-phases-used-in-arch1001\src\phases.c @ 296]:
-  296 00007ff6`dcf82643 486385c4000000  movsxd  rax,dword ptr [rbp+0C4h]
-  296 00007ff6`dcf8264a 837c854806      cmp     dword ptr [rbp+rax*4+48h],6
-  296 00007ff6`dcf8264f 7e05            jle     bomb!phase_6+0xa6 (00007ff6`dcf82656)  Branch
-```
 \> L'instruction cmp ..., 6 suivie d'un saut jle confirme que la valeur n'excède pas 6
+
+Si l'une de ces conditions échoue, le flux d'exécution est dérouté vers explode_bomb. Cette contrainte restreint mathématiquement l'espace des solutions aux chiffres $\{1, 2, 3, 4, 5, 6\}$.
+
+![phase6-1](images/phase6-1.png)
+
+Une fois l'intervalle validé, le binaire exécute une seconde vérification plus sophistiquée destinée à garantir l'unicité de chaque chiffre. Ce mécanisme repose sur une structure de boucles imbriquées située entre les adresses `00007ff6dcf8265e` et `00007ff6dcf8269c`. Le principe est le suivant : pour chaque nombre à l'index i (la boucle externe), le programme initialise une seconde boucle à l'index j = i+1. Il parcourt alors le reste du tableau pour comparer chaque élément ultérieur à l'élément actuel via l'instruction `cmp dword ptr [rbp+rax*4+48h], ecx` à l'adresse `00007ff6dcf8268f`. Si une égalité est détectée (jne non activé), la bombe explose.Cette logique de comparaison assure que l'entrée utilisateur est une permutation unique des chiffres de 1 à 6. Ce n'est qu'après avoir franchi ces deux barrières de sécurité que le programme autorise la transition vers le bloc suivant : la manipulation des nœuds de la liste chaînée.
 
 La particularité de la phase suivante réside dans l'utilisation d'une liste chaînée statique débutant à l'adresse `bomb!node1`. L'exploration de la mémoire avec la commande `dq` (Display Quad-word) dans WinDbg permet de déconstruire la structure interne de chaque nœud. Chaque élément occupe 16 octets : 
 - les 4 premiers octets contiennent la valeur numérique (le score),
