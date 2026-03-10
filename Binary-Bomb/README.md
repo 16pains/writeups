@@ -215,3 +215,5 @@ Le binaire exige donc que nous réordonnions les nœuds par ordre décroissant d
 En classant les valeurs identifiées précédemment du plus grand au plus petit (935 > 915 > 533 > 530 > 512 > 450), nous obtenons la séquence d'ID suivante : 5 4 3 1 6 2.
 
 L'ajout de cette suite dans le fichier solutions.txt désamorce la sixième phase. Le programme affiche alors le message de félicitations, confirmant que la "bombe" a été intégralement neutralisée.
+
+![phase6-done](images/phase6-done.png)
